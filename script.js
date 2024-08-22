@@ -1,115 +1,143 @@
-let questions = [
+
+const quizData = {
+    html: [
     {
-        question: 'Which HTML tag is used to define an inline style?',
-        choice1: '<script>',
-        choice2: '<css>',
-        choice3: '<style>',
-        choice4: '<span>',
-        answer: 3,
+        question: "Which HTML tag is used to define an inline style?",
+        choices: ["<script>", "<css>", "<style>", "<span>"],
+        answer: 2
     },
     {
-        question: 'Which property is used to change the text color in CSS?',
-        choice1: 'text-color',
-        choice2: 'font-color',
-        choice3: 'text-style',
-        choice4: 'color',
-        answer: 4,
+        question: "Which property is used to change the text color in CSS?",
+        choices: ["text-color", "font-color", "text-style", "color"],
+        answer: 3
     },
     {
-        question: 'Which of the following is the correct way to comment in HTML?',
-        choice1: '// Comment',
-        choice2: '<!-- Comment -->',
-        choice3: '/* Comment */',
-        choice4: '<! Comment>',
-        answer: 2,
+        question: "Which of the following is the correct way to comment in HTML?",
+        choices: ["// Comment", "<!-- Comment -->", "/* Comment */", "<! Comment>"],
+        answer: 1
+    }
+    ],
+    css: [
+    {
+        question: "What does CSS stand for?",
+        choices: [
+        "Cascading Style Sheets",
+        "Colorful Style Sheets",
+        "Creative Style Sheets",
+        "Computer Style Sheets"
+        ],
+        answer: 0
     },
-];
+    {
+        question: "Which CSS property controls the text size?",
+        choices: ["font-style", "text-size", "font-size", "text-style"],
+        answer: 2
+    }
+    ],
+    js: [
+    {
+        question: "Which company developed JavaScript?",
+        choices: ["Mozilla", "Netscape", "Microsoft", "Google"],
+        answer: 1
+    },
+    {
+        question: "Which of the following is not a JavaScript data type?",
+        choices: ["Null", "Undefined", "Number", "Character"],
+        answer: 3
+    }
+    ]
+};
+
+let questions = [];
+const urlParams = new URLSearchParams(window.location.search);
+const selectedQuiz = urlParams.get("quiz");
+
+if (selectedQuiz && quizData[selectedQuiz]) {
+    questions = quizData[selectedQuiz];
+}
+
 const scoreText = document.getElementById("score");
 let questionIndex = 0;
 let score = 0;
 let questionCounter = 1;
 const progressText = document.getElementById("progressText");
-const progressBarFull = document.getElementById("progressBarFull"); 
+const progressBarFull = document.getElementById("progressBarFull");
 
 function displayQuestion() {
-    let questionElement = document.getElementById('question');
-    let choiceContainer = document.getElementById('choice-container');
+    let questionElement = document.getElementById("question");
+    let choiceContainer = document.getElementById("choice-container");
     let currentQuestion = questions[questionIndex];
 
     questionElement.textContent = currentQuestion.question;
-    choiceContainer.innerHTML = '';
+    choiceContainer.innerHTML = "";
 
-    const letters = ['A', 'B', 'C', 'D'];
-    for (let i = 1; i <= 4; i++) {
-        let choice = currentQuestion['choice' + i];
-        
-        let choiceElement = document.createElement('div');
-        choiceElement.classList.add('choice');
-        choiceElement.dataset.choiceIndex = i;
-        
-        let prefix = document.createElement('p');
-        prefix.classList.add('choice-prefix');
-        prefix.textContent = letters[i - 1];
-        
-        let text = document.createElement('p');
-        text.classList.add('choice-text');
-        text.textContent = choice;
-        
-        choiceElement.appendChild(prefix);
-        choiceElement.appendChild(text);
-        
-        choiceContainer.appendChild(choiceElement);
-        
-        choiceElement.addEventListener('click', function() {
-            selectAnswer(i);
-        });
-    }
+    const letters = ["A", "B", "C", "D"];
+    currentQuestion.choices.forEach((choice, i) => {
+    let choiceElement = document.createElement("div");
+    choiceElement.classList.add("choice");
+    choiceElement.dataset.choiceIndex = i;
+
+    let prefix = document.createElement("p");
+    prefix.classList.add("choice-prefix");
+    prefix.textContent = letters[i];
+
+    let text = document.createElement("p");
+    text.classList.add("choice-text");
+    text.textContent = choice;
+
+    choiceElement.appendChild(prefix);
+    choiceElement.appendChild(text);
+
+    choiceContainer.appendChild(choiceElement);
+
+    choiceElement.addEventListener("click", function () {
+        selectAnswer(i);
+    });
+    });
+
     progressText.innerHTML = `Question ${questionCounter}/${questions.length}`;
     let progressPercentage = ((questionCounter - 1) / questions.length) * 100;
     progressBarFull.style.width = `${progressPercentage}%`;
 }
 
 function selectAnswer(choiceIndex) {
-    let choiceElements = document.querySelectorAll('.choice');
+    let choiceElements = document.querySelectorAll(".choice");
     let currentQuestion = questions[questionIndex];
-    let clickedChoiceIndex = choiceIndex; 
+    let clickedChoiceIndex = choiceIndex;
 
-    for (let i = 0; i < choiceElements.length; i++) {
-        let choiceElement = choiceElements[i];
-        let index = parseInt(choiceElement.dataset.choiceIndex);
-
-        // Check if the current choice is the one that was clicked
-        if (index === clickedChoiceIndex) {
-            if (index === currentQuestion.answer) {
-                choiceElement.classList.add('correct-answer');
-                incrementScore(10);
-            } else {
-                choiceElement.classList.add('incorrect-answer');
-            }
-            // Remove the event listener for the clicked choice
-            choiceElement.removeEventListener('click', selectAnswer); 
-        } 
-        choiceElements[clickedChoiceIndex - 1].removeEventListener('click', selectAnswer); 
+    choiceElements.forEach((choiceElement, i) => {
+    if (i === clickedChoiceIndex) {
+        if (i === currentQuestion.answer) {
+        choiceElement.classList.add("correct-answer");
+        incrementScore(10);
+        } else {
+        choiceElement.classList.add("incorrect-answer");
+        }
+        choiceElement.removeEventListener("click", selectAnswer);
     }
+    });
 
     questionIndex++;
     questionCounter++;
     if (questionIndex < questions.length) {
-        setTimeout(displayQuestion, 500); 
+    setTimeout(displayQuestion, 500);
     } else {
-        setTimeout(() => {
-            localStorage.setItem('score', score);
-            window.location.replace("./end.html"); 
-        }, 500);
+    setTimeout(() => {
+        localStorage.setItem("score", score);
+        window.location.replace("./end.html");
+    }, 500);
     }
 }
 
-function incrementScore(num){
+function incrementScore(num) {
     score += num;
     scoreText.innerText = score;
 }
+let toggle = document.getElementById("toggle");
+toggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark-theme");
+});
   
-
-
-
+  
 displayQuestion();
+  
